@@ -1,12 +1,14 @@
 package api.vanilla.handlers;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.nio.ByteBuffer;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,7 +52,22 @@ public class UserHandler implements HttpHandler {
                         response = "User not found";
                     }
                 }
+            } else if (method.equals("POST")) {
+                StringBuilder buf;
+                try (InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "utf-8")) {
+                    try (BufferedReader br = new BufferedReader(isr)) {
+                        int b;
+                        buf = new StringBuilder(512);
+                        while ((b = br.read()) != -1) {
+                            buf.append((char) b);
+                        }
+                    }
+                }
+
+                Map<String, String> body = parseUrlEncoded(buf.toString());
+                response = post(body);
             }
+
             String[] contentType = {"application/json"};
             exchange.getResponseHeaders().put("Content-Type", List.of(contentType));
             exchange.sendResponseHeaders(statusCode, response.length());
@@ -77,7 +94,7 @@ public class UserHandler implements HttpHandler {
         try (Statement statement = this.connection.createStatement()) {
             resultSet = statement.executeQuery("SELECT * FROM user");
             while (resultSet.next()) {
-                users.add(parseUser(resultSet));
+                users.add(User.fromResultSet(resultSet));
             }
             resultSet.close();
         }
@@ -94,48 +111,62 @@ public class UserHandler implements HttpHandler {
             System.out.println(query);
             resultSet = statement.executeQuery(query);
             if (resultSet.next()) {
-                return parseUser(resultSet).toString();
+                return User.fromResultSet(resultSet).toString();
             } else {
                 return null;
             }
         }
+    }
 
+    public String post(Map<String, String> body) throws SQLException {
+        User user = User.fromMap(body);
+
+        String query = "INSERT INTO user (id, name, email) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = this.connection.prepareStatement(query)) {
+            user.setId(UUID.randomUUID());
+            statement.setBytes(1, user.getIdBytes());
+            statement.setString(2, user.getName());
+            statement.setString(3, user.getEmail());
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating user failed, no rows affected.");
+            }
+            // Existing table does not have default value for id, must be the JPA config in spring project
+            // try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+            //     if (generatedKeys.next()) {
+            //         user.setId(generatedKeys.getBytes(1));
+            //     } else {
+            //         throw new SQLException("Creating user failed, no ID obtained.");
+            //     }
+            // }
+            return user.toString();
+        }
     }
 
     public Map<String, String> parseQuery(URI uri) throws UnsupportedEncodingException {
         // reference: https://stackoverflow.com/a/13592567
-        Map<String, String> queries = new LinkedHashMap<>();
         String query = uri.getQuery();
         if (query == null) {
-            return queries;
+            return new LinkedHashMap<>();
         }
-        String[] pairs = query.split("&");
+
+        return parseUrlEncoded(query);
+    }
+
+    public Map<String, String> parseUrlEncoded(String encodedUrl) throws UnsupportedEncodingException {
+        Map<String, String> properties = new LinkedHashMap<>();
+        if (encodedUrl == null) {
+            return properties;
+        }
+        String[] pairs = encodedUrl.split("&");
         for (String pair : pairs) {
             int idx = pair.indexOf("=");
-            queries.put(
+            properties.put(
                     URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
                     URLDecoder.decode(pair.substring(idx + 1), "UTF-8")
             );
         }
-        return queries;
-    }
-
-    public User parseUser(ResultSet resultSet) throws SQLException {
-        User user = new User();
-
-        user.setId(decryptUUID(resultSet.getBytes("id")));
-        user.setEmail(resultSet.getString("email"));
-        user.setName(resultSet.getString("name"));
-
-        return user;
-    }
-
-    public UUID decryptUUID(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long high = bb.getLong();
-        long low = bb.getLong();
-
-        return new UUID(high, low);
+        return properties;
     }
 
 }
