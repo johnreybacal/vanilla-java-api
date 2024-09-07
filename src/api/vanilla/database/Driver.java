@@ -17,7 +17,7 @@ public class Driver {
             String pass = System.getenv("DB_PASS");
             this.connection = DriverManager.getConnection(url, user, pass);
         } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
