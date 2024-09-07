@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -105,11 +106,16 @@ public class UserHandler implements HttpHandler {
     public String getOne(String id) throws SQLException {
         ResultSet resultSet;
 
-        try (Statement statement = this.connection.createStatement()) {
-            // Prone to SQL injection
-            String query = "SELECT * FROM user WHERE id = uuid_to_bin('" + id + "')";
-            System.out.println(query);
-            resultSet = statement.executeQuery(query);
+        UUID uuid = UUID.fromString(id);
+        ByteBuffer bb = ByteBuffer.allocate(16);
+        bb.putLong(uuid.getMostSignificantBits());
+        bb.putLong(uuid.getLeastSignificantBits());
+
+        String query = "SELECT * FROM user WHERE id = uuid_to_bin(?)";
+        try (PreparedStatement statement = this.connection.prepareStatement(query)) {
+            statement.setString(1, id);
+            resultSet = statement.executeQuery();
+
             if (resultSet.next()) {
                 return User.fromResultSet(resultSet).toString();
             } else {
