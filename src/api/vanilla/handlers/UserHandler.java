@@ -51,9 +51,9 @@ public class UserHandler implements HttpHandler {
                     }
                 }
             }
-            exchange.sendResponseHeaders(statusCode, response.length());
             String[] contentType = {"application/json"};
             exchange.getResponseHeaders().put("Content-Type", List.of(contentType));
+            exchange.sendResponseHeaders(statusCode, response.length());
 
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.getBytes());
@@ -123,9 +123,9 @@ public class UserHandler implements HttpHandler {
     public User parseUser(ResultSet resultSet) throws SQLException {
         User user = new User();
 
-        user.id = decryptUUID(resultSet.getBytes("id"));
-        user.email = resultSet.getString("email");
-        user.name = resultSet.getString("name");
+        user.setId(decryptUUID(resultSet.getBytes("id")));
+        user.setEmail(resultSet.getString("email"));
+        user.setName(resultSet.getString("name"));
 
         return user;
     }
