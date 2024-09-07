@@ -37,8 +37,16 @@ public class App {
                 }
 
                 httpExchange.sendResponseHeaders(statusCode, response.length());
-                httpExchange.getResponseBody().write(response.getBytes());
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
             } catch (IOException e) {
+                System.out.println("IOException");
+                System.out.println(e);
+                httpExchange.sendResponseHeaders(500, e.getMessage().length());
+                httpExchange.getResponseBody().write(e.getMessage().getBytes());
+            } catch (Exception e) {
+                System.out.println("Exception");
                 System.out.println(e);
                 httpExchange.sendResponseHeaders(500, e.getMessage().length());
                 httpExchange.getResponseBody().write(e.getMessage().getBytes());
