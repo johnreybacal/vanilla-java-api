@@ -1,12 +1,17 @@
 package api.vanilla.main;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -14,26 +19,62 @@ import com.sun.net.httpserver.HttpServer;
 public class App {
 
     public static void main(String[] args) throws Exception {
+        List<Map<String, String>> users = new ArrayList<>();
+
+        Map<String, String> user = new HashMap<>();
+        user.put("id", "1");
+        user.put("name", "USER 1");
+        users.add(user);
+
+        user = new HashMap<>();
+        user.put("id", "2");
+        user.put("name", "USER 2");
+        users.add(user);
+
         // reference: https://stackoverflow.com/a/3732328
         int port = 8000;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/hello", (HttpExchange httpExchange) -> {
+        server.createContext("/users", (HttpExchange httpExchange) -> {
             try {
                 String method = httpExchange.getRequestMethod();
                 String response = new String();
+                String[] segments = httpExchange.getRequestURI().getPath().split("/");
                 int statusCode = 200;
-                System.out.println(method);
+                System.out.println(method + " " + segments.length);
 
                 if (method.equals("GET")) {
-                    response = "Hello";
+                    if (segments.length == 2) {
+                        Map<String, String> queries = parseQuery(httpExchange.getRequestURI());
 
-                    Map<String, String> queries = parseQuery(httpExchange.getRequestURI());
-                    String name = queries.get("name");
+                        String qName = queries.get("name");
 
-                    if (name != null) {
-                        response += ", " + name + "!";
+                        if (qName != null) {
+                            final String name = qName.toLowerCase();
+                            List<Map<String, String>> result = users.stream()
+                                    .filter(u -> {
+                                        String uName = u.get("name").toLowerCase();
+
+                                        return uName.contains(name) || name.contains(uName);
+                                    })
+                                    .collect(Collectors.toList());
+
+                            response = result.toString();
+                        } else {
+                            response = users.toString();
+                        }
+                    } else if (segments.length == 3) {
+                        String id = segments[2];
+                        List<Map<String, String>> result = users.stream()
+                                .filter(u -> u.get("id").equals(id))
+                                .collect(Collectors.toList());
+
+                        if (result.isEmpty()) {
+                            statusCode = 404;
+                            response = "User not found";
+                        } else {
+                            response = result.get(0).toString();
+                        }
                     }
-                    System.out.println(response);
                 }
 
                 httpExchange.sendResponseHeaders(statusCode, response.length());
