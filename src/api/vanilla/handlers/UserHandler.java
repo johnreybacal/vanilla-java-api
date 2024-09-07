@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +52,9 @@ public class UserHandler implements HttpHandler {
                 }
             }
             exchange.sendResponseHeaders(statusCode, response.length());
+            String[] contentType = {"application/json"};
+            exchange.getResponseHeaders().put("Content-Type", List.of(contentType));
+
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.getBytes());
             }
@@ -71,7 +73,7 @@ public class UserHandler implements HttpHandler {
 
     public String get(Map<String, String> query) throws SQLException {
         ResultSet resultSet;
-        List<Map<String, String>> users = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         try (Statement statement = this.connection.createStatement()) {
             resultSet = statement.executeQuery("SELECT * FROM user");
             while (resultSet.next()) {
@@ -118,12 +120,12 @@ public class UserHandler implements HttpHandler {
         return queries;
     }
 
-    public Map<String, String> parseUser(ResultSet resultSet) throws SQLException {
-        Map<String, String> user = new HashMap<>();
+    public User parseUser(ResultSet resultSet) throws SQLException {
+        User user = new User();
 
-        user.put("id", decryptUUID(resultSet.getBytes("id")).toString());
-        user.put("email", resultSet.getString("email"));
-        user.put("name", resultSet.getString("name"));
+        user.id = decryptUUID(resultSet.getBytes("id"));
+        user.email = resultSet.getString("email");
+        user.name = resultSet.getString("name");
 
         return user;
     }
