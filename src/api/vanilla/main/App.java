@@ -16,9 +16,13 @@ import java.util.stream.Collectors;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
+import api.vanilla.database.Driver;
+
 public class App {
 
     public static void main(String[] args) throws Exception {
+        Driver driver = Driver.getInstance();
+        System.out.println("Connected to " + driver.getConnection().getMetaData().getDatabaseProductName());
         List<Map<String, String>> users = new ArrayList<>();
 
         Map<String, String> user = new HashMap<>();
