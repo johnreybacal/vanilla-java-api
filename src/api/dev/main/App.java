@@ -19,6 +19,7 @@ public class App {
         router.on(Method.GET, "/:id", userController::get);
         router.on(Method.POST, userController::create);
         router.on(Method.PUT, "/:id", userController::update);
+        router.on(Method.DELETE, "/:id", userController::delete);
 
         RouteResolver.getInstance().register(router);
         server.start();

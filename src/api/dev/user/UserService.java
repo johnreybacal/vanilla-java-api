@@ -86,7 +86,7 @@ public class UserService {
         }
     }
 
-    public boolean delete(UUID id) throws SQLException, ServerException {
+    public void delete(UUID id) throws SQLException, ServerException {
         String query = "DELETE FROM user WHERE id = uuid_to_bin(?)";
 
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
@@ -95,8 +95,6 @@ public class UserService {
             if (affectedRows == 0) {
                 throw ServerException.notFound();
             }
-
-            return true;
         } catch (SQLException | ServerException ex) {
             throw ex;
         }

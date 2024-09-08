@@ -69,4 +69,17 @@ public class UserController {
             throw new ServerException(e);
         }
     }
+
+    public void delete(Request request, Response response)
+            throws ServerException {
+        try {
+            String id = request.getParameters().get("id");
+
+            service.delete(UUID.fromString(id));
+
+            response.sendJson(200, "User has been deleted");
+        } catch (Exception e) {
+            throw new ServerException(e);
+        }
+    }
 }
