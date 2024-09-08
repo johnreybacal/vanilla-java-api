@@ -2,6 +2,7 @@ package api.vanilla.main;
 
 import java.net.InetSocketAddress;
 
+import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 
 import api.vanilla.handlers.UserHandler;
@@ -13,6 +14,7 @@ public class App {
         int port = 8000;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/users", new UserHandler());
+        HttpContext context = server.createContext("/he");
         server.setExecutor(null); // creates a default executor
         server.start();
 
