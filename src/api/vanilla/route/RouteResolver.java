@@ -1,19 +1,21 @@
 package api.vanilla.route;
 
-import api.vanilla.stream.Request;
-import api.vanilla.stream.Response;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
+import api.vanilla.stream.Request;
+import api.vanilla.stream.Response;
 
 public class RouteResolver implements HttpHandler {
 
     private static RouteResolver instance;
     private final List<Route> routes;
 
-    public RouteResolver getInstance() {
+    public static RouteResolver getInstance() {
         if (RouteResolver.instance == null) {
             RouteResolver.instance = new RouteResolver();
         }
