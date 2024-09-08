@@ -61,6 +61,9 @@ public class UserHandler implements HttpHandler {
                 String id = segments[2];
                 Map<String, String> body = parseUrlEncodedBody(exchange.getRequestBody());
                 response = put(id, body);
+            } else if (method.equals("DELETE")) {
+                String id = segments[2];
+                response = delete(id);
             }
 
             String[] contentType = {"application/json"};
@@ -159,6 +162,20 @@ public class UserHandler implements HttpHandler {
 
             user.setId(UUID.fromString(id));
             return user.toString();
+        }
+    }
+
+    public String delete(String id) throws SQLException {
+        String query = "DELETE FROM user WHERE id = uuid_to_bin(?)";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(query)) {
+            statement.setString(1, id);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("User not found.");
+            }
+
+            return "User has been deleted.";
         }
     }
 
