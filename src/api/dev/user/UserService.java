@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import api.dev.database.Driver;
+import api.vanilla.exception.ServerException;
 
 public class UserService {
 
@@ -19,7 +20,7 @@ public class UserService {
         this.connection = Driver.getInstance().getConnection();
     }
 
-    public List<User> list() {
+    public List<User> list() throws SQLException {
         ResultSet resultSet;
         List<User> users = new ArrayList<>();
         try (Statement statement = this.connection.createStatement()) {
@@ -28,13 +29,13 @@ public class UserService {
                 users.add(User.fromResultSet(resultSet));
             }
             resultSet.close();
+            return users;
         } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
+            throw ex;
         }
-        return users;
     }
 
-    public User get(UUID id) {
+    public User get(UUID id) throws SQLException {
         String query = "SELECT * FROM user WHERE id = uuid_to_bin(?)";
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
             statement.setString(1, id.toString());
@@ -43,13 +44,13 @@ public class UserService {
             if (resultSet.next()) {
                 return User.fromResultSet(resultSet);
             }
+            return null;
         } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
+            throw ex;
         }
-        return null;
     }
 
-    public User create(User user) {
+    public User create(User user) throws SQLException {
         String query = "INSERT INTO user (id, name, email) VALUES (?, ?, ?)";
 
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
@@ -63,12 +64,11 @@ public class UserService {
             }
             return user;
         } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
-            return null;
+            throw ex;
         }
     }
 
-    public User update(User user) {
+    public User update(User user) throws SQLException, ServerException {
         String query = "UPDATE user SET name = ?, email = ? WHERE id = uuid_to_bin(?)";
 
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
@@ -77,30 +77,28 @@ public class UserService {
             statement.setString(3, user.getId().toString());
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
-                throw new SQLException("User not found.");
+                throw ServerException.notFound();
             }
 
             return user;
-        } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
-            return null;
+        } catch (SQLException | ServerException ex) {
+            throw ex;
         }
     }
 
-    public boolean delete(UUID id) {
+    public boolean delete(UUID id) throws SQLException, ServerException {
         String query = "DELETE FROM user WHERE id = uuid_to_bin(?)";
 
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
             statement.setString(1, id.toString());
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
-                throw new SQLException("User not found.");
+                throw ServerException.notFound();
             }
 
             return true;
-        } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
-            return false;
+        } catch (SQLException | ServerException ex) {
+            throw ex;
         }
     }
 }
