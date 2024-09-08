@@ -39,18 +39,26 @@ public class RouteResolver implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         try {
             for (Route route : this.routes) {
+                System.out.println(exchange.getRequestMethod() + " " + route.getMethod());
                 if (exchange.getRequestMethod().equals(route.getMethod())) {
+                    System.out.println(exchange.getRequestURI().getPath() + " " + route.getUrl());
                     if (exchange.getRequestURI().getPath().equals(route.getUrl())) {
                         Request request = new Request(exchange);
                         Response response = new Response(exchange);
                         route.getCallback().resolve(request, response);
+                        return;
                     }
                 }
             }
-        } catch (Exception e) {
+            String message = "URL not found";
+            exchange.sendResponseHeaders(404, message.length());
+            exchange.getResponseBody().write(message.getBytes());
+        } catch (IOException e) {
             System.err.println(e);
             exchange.sendResponseHeaders(500, e.getMessage().length());
             exchange.getResponseBody().write(e.getMessage().getBytes());
+        } finally {
+            exchange.close();
         }
     }
 

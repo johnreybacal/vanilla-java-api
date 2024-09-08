@@ -2,6 +2,7 @@ package api.vanilla.stream;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -30,5 +31,12 @@ public class Response {
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes());
         }
+    }
+
+    public void sendJson(int statusCode, Object data) throws IOException {
+        List<String> contentType = new ArrayList<>();
+        contentType.add("application/json");
+        exchange.getResponseHeaders().put("Content-Type", contentType);
+        this.send(statusCode, data);
     }
 }

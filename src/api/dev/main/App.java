@@ -15,7 +15,8 @@ public class App {
         HttpServer server = ServerFactory.create();
         UserController userController = new UserController();
         Router router = new Router("/users");
-        router.on(Method.GET, "/", userController::list);
+        router.on(Method.GET, userController::list);
+        router.on(Method.POST, userController::create);
 
         RouteResolver.getInstance().register(router);
         server.start();

@@ -19,6 +19,11 @@ public class Router {
         this.routes.add(route);
     }
 
+    public void on(Method method, RequestResolver callback) {
+        Route route = new Route(url, method, callback);
+        this.routes.add(route);
+    }
+
     public String getUrl() {
         return url;
     }
