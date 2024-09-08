@@ -33,6 +33,7 @@ public class RouteResolver implements HttpHandler {
 
     /**
      * Register a router
+     *
      * @param router
      */
     public void register(Router router) {
@@ -41,6 +42,7 @@ public class RouteResolver implements HttpHandler {
 
     /**
      * Register a route
+     *
      * @param route
      */
     public void register(Route route) {
@@ -49,7 +51,7 @@ public class RouteResolver implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        try (exchange) {
+        try {
             for (Route route : this.routes) {
                 if (RouteHelper.isRouteMatch(route, exchange.getRequestMethod(), exchange.getRequestURI().getPath())) {
                     Request request = new Request(exchange);
@@ -65,6 +67,8 @@ public class RouteResolver implements HttpHandler {
         } catch (ServerException e) {
             exchange.sendResponseHeaders(e.getStatusCode(), e.getMessage().length());
             exchange.getResponseBody().write(e.getMessage().getBytes());
+        } finally {
+            exchange.close();
         }
     }
 

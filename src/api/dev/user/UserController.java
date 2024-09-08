@@ -36,6 +36,8 @@ public class UserController {
                 throw ServerException.notFound();
             }
             response.sendJson(200, user);
+        } catch (ServerException e) {
+            throw e;
         } catch (Exception e) {
             throw new ServerException(e);
         }
