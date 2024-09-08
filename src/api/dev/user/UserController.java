@@ -54,4 +54,19 @@ public class UserController {
             throw new ServerException(e);
         }
     }
+
+    public void update(Request request, Response response)
+            throws ServerException {
+        try {
+            User user = User.fromMap(request.getBodyUrlEncoded());
+            String id = request.getParameters().get("id");
+            user.setId(UUID.fromString(id));
+
+            user = service.update(user);
+
+            response.sendJson(200, user);
+        } catch (Exception e) {
+            throw new ServerException(e);
+        }
+    }
 }
