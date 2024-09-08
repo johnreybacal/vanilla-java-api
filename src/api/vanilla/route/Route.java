@@ -3,6 +3,9 @@ package api.vanilla.route;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Attach a callback to a request (Method and URL)
+ */
 public class Route {
 
     private final String url;

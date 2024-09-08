@@ -1,5 +1,8 @@
 package api.vanilla.route;
 
+/**
+ * Request methods
+ */
 public enum Method {
     GET("GET"),
     POST("POST"),

@@ -11,6 +11,11 @@ import api.vanilla.stream.Request;
 
 public class RouteHelper {
 
+    /**
+     * Get the segments of the path, omitting empty segments
+     * @param path
+     * @return List of segments
+     */
     public static List<String> getSegments(String path) {
         List<String> segments = Stream.of(path.split("/"))
                 .filter(predicate -> predicate.length() > 0)
@@ -18,6 +23,11 @@ public class RouteHelper {
         return segments;
     }
 
+    /**
+     * Detects and maps the parameters in a URL segment
+     * @param urlSegments
+     * @return Map of parameters - (key: index, value: parameter)
+     */
     public static Map<Integer, String> getParameters(List<String> urlSegments) {
         Map<Integer, String> parameters = new HashMap<>();
 
@@ -31,6 +41,13 @@ public class RouteHelper {
         return parameters;
     }
 
+    /**
+     * Check if the request Method and URL matches a Route
+     * @param route
+     * @param method
+     * @param url
+     * @return boolean
+     */
     public static boolean isRouteMatch(Route route, String method, String url) {
         if (!route.getMethod().equals(method)) {
             return false;
@@ -54,6 +71,11 @@ public class RouteHelper {
                 .equals(String.join("", current));
     }
 
+    /**
+     * Compares the request URL against the route paramaters and attaches it to the request
+     * @param request
+     * @param routeParams
+     */
     public static void setRequestParameters(Request request, Map<Integer, String> routeParams) {
         List<String> urlSegments = getSegments(request.getPath());
 

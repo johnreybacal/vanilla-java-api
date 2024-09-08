@@ -1,5 +1,8 @@
 package api.vanilla.exception;
 
+/**
+ * Exception with status code
+ */
 public class ServerException extends Exception {
 
     final private int statusCode;

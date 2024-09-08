@@ -7,6 +7,9 @@ import java.util.List;
 
 import com.sun.net.httpserver.HttpExchange;
 
+/**
+ * Wrapper for HttpExchange. Only contains members necessary for a Response
+ */
 public class Response {
 
     private final HttpExchange exchange;

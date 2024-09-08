@@ -10,6 +10,9 @@ import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 
+/**
+ * Wrapper for HttpExchange. Only contains members necessary for a Request
+ */
 public class Request {
 
     private final HttpExchange exchange;

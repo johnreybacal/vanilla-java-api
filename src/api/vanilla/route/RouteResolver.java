@@ -11,6 +11,9 @@ import api.vanilla.exception.ServerException;
 import api.vanilla.stream.Request;
 import api.vanilla.stream.Response;
 
+/**
+ * Iterates through all routes and resolves the callback of a matching route
+ */
 public class RouteResolver implements HttpHandler {
 
     private static RouteResolver instance;
@@ -28,10 +31,18 @@ public class RouteResolver implements HttpHandler {
         this.routes = new ArrayList<>();
     }
 
+    /**
+     * Register a router
+     * @param router
+     */
     public void register(Router router) {
         this.routes.addAll(router.getRoutes());
     }
 
+    /**
+     * Register a route
+     * @param route
+     */
     public void register(Route route) {
         this.routes.add(route);
     }

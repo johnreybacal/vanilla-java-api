@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Associate routes to a base URL
+ */
 public class Router {
 
     private final String url;
