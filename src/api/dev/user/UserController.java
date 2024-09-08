@@ -24,6 +24,17 @@ public class UserController {
         }
     }
 
+    public void get(Request request, Response response) {
+        try {
+            String id = request.getParameters().get("id");
+            User user = service.get(UUID.fromString(id));
+
+            response.sendJson(200, user);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
     public void create(Request request, Response response) {
         try {
             User user = User.fromMap(request.getBodyUrlEncoded());

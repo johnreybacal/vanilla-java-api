@@ -37,17 +37,17 @@ public class RouteResolver implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        try {
+        try (exchange) {
             for (Route route : this.routes) {
-                System.out.println(exchange.getRequestMethod() + " " + route.getMethod());
-                if (exchange.getRequestMethod().equals(route.getMethod())) {
-                    System.out.println(exchange.getRequestURI().getPath() + " " + route.getUrl());
-                    if (exchange.getRequestURI().getPath().equals(route.getUrl())) {
-                        Request request = new Request(exchange);
-                        Response response = new Response(exchange);
-                        route.getCallback().resolve(request, response);
-                        return;
-                    }
+                if (RouteHelper.isRouteMatch(route, exchange.getRequestMethod(), exchange.getRequestURI().getPath())) {
+                    System.out.println("MATCH");
+                    Request request = new Request(exchange);
+                    Response response = new Response(exchange);
+                    RouteHelper.setRequestParameters(request, route.getParameters());
+
+                    route.getCallback().resolve(request, response);
+
+                    return;
                 }
             }
             String message = "URL not found";
@@ -57,8 +57,6 @@ public class RouteResolver implements HttpHandler {
             System.err.println(e);
             exchange.sendResponseHeaders(500, e.getMessage().length());
             exchange.getResponseBody().write(e.getMessage().getBytes());
-        } finally {
-            exchange.close();
         }
     }
 

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -12,13 +13,23 @@ import com.sun.net.httpserver.HttpExchange;
 public class Request {
 
     private final HttpExchange exchange;
+    private final Map<String, String> parameters;
 
     public Request(HttpExchange exchange) {
         this.exchange = exchange;
+        this.parameters = new HashMap<>();
     }
 
     public String getMethod() {
         return exchange.getRequestMethod();
+    }
+
+    public String getPath() {
+        return exchange.getRequestURI().getPath();
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 
     public String getBody() throws IOException {

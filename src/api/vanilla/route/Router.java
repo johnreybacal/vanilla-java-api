@@ -2,6 +2,7 @@ package api.vanilla.route;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Router {
 
@@ -15,7 +16,11 @@ public class Router {
 
     public void on(Method method, String url, RequestResolver callback) {
         url = this.url + url;
-        Route route = new Route(url, method, callback);
+
+        List<String> urlSegments = RouteHelper.getSegments(url);
+        Map<Integer, String> parameters = RouteHelper.getParameters(urlSegments);
+
+        Route route = new Route(url, method, parameters, callback);
         this.routes.add(route);
     }
 
