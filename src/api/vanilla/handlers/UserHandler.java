@@ -41,29 +41,38 @@ public class UserHandler implements HttpHandler {
             String[] segments = exchange.getRequestURI().getPath().split("/");
             int statusCode = 200;
 
-            if (method.equals("GET")) {
-                if (segments.length == 2) {
-                    Map<String, String> query = parseQuery(exchange.getRequestURI());
-                    response = this.get(query);
+            switch (method) {
+                case "GET" -> {
+                    if (segments.length == 2) {
+                        Map<String, String> query = parseQuery(exchange.getRequestURI());
+                        response = this.get(query);
 
-                } else if (segments.length == 3) {
-                    String id = segments[2];
-                    response = this.getOne(id);
-                    if (response == null) {
-                        statusCode = 404;
-                        response = "User not found";
+                    } else if (segments.length == 3) {
+                        String id = segments[2];
+                        response = this.getOne(id);
+                        if (response == null) {
+                            statusCode = 404;
+                            response = "User not found";
+                        }
                     }
                 }
-            } else if (method.equals("POST")) {
-                Map<String, String> body = parseUrlEncodedBody(exchange.getRequestBody());
-                response = post(body);
-            } else if (method.equals("PUT")) {
-                String id = segments[2];
-                Map<String, String> body = parseUrlEncodedBody(exchange.getRequestBody());
-                response = put(id, body);
-            } else if (method.equals("DELETE")) {
-                String id = segments[2];
-                response = delete(id);
+                case "POST" -> {
+                    Map<String, String> body = parseUrlEncodedBody(exchange.getRequestBody());
+                    response = post(body);
+                }
+                case "PUT" -> {
+                    String id = segments[2];
+                    Map<String, String> body = parseUrlEncodedBody(exchange.getRequestBody());
+                    response = put(id, body);
+                }
+                case "DELETE" -> {
+                    String id = segments[2];
+                    response = delete(id);
+                }
+                default -> {
+                    statusCode = 405;
+                    response = "Method not allowed";
+                }
             }
 
             String[] contentType = {"application/json"};
