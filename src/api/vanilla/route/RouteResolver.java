@@ -7,6 +7,7 @@ import java.util.List;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import api.vanilla.exception.ServerException;
 import api.vanilla.stream.Request;
 import api.vanilla.stream.Response;
 
@@ -49,12 +50,9 @@ public class RouteResolver implements HttpHandler {
                     return;
                 }
             }
-            String message = "URL not found";
-            exchange.sendResponseHeaders(404, message.length());
-            exchange.getResponseBody().write(message.getBytes());
-        } catch (IOException e) {
-            System.err.println(e);
-            exchange.sendResponseHeaders(500, e.getMessage().length());
+            throw ServerException.notFound();
+        } catch (ServerException e) {
+            exchange.sendResponseHeaders(e.getStatusCode(), e.getMessage().length());
             exchange.getResponseBody().write(e.getMessage().getBytes());
         }
     }
