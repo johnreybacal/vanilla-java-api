@@ -2,6 +2,7 @@ package api.vanilla.handlers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -54,19 +55,12 @@ public class UserHandler implements HttpHandler {
                     }
                 }
             } else if (method.equals("POST")) {
-                StringBuilder buf;
-                try (InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "utf-8")) {
-                    try (BufferedReader br = new BufferedReader(isr)) {
-                        int b;
-                        buf = new StringBuilder(512);
-                        while ((b = br.read()) != -1) {
-                            buf.append((char) b);
-                        }
-                    }
-                }
-
-                Map<String, String> body = parseUrlEncoded(buf.toString());
+                Map<String, String> body = parseUrlEncodedBody(exchange.getRequestBody());
                 response = post(body);
+            } else if (method.equals("PUT")) {
+                String id = segments[2];
+                Map<String, String> body = parseUrlEncodedBody(exchange.getRequestBody());
+                response = put(id, body);
             }
 
             String[] contentType = {"application/json"};
@@ -149,6 +143,25 @@ public class UserHandler implements HttpHandler {
         }
     }
 
+    public String put(String id, Map<String, String> body) throws SQLException {
+        User user = User.fromMap(body);
+
+        String query = "UPDATE user SET name = ?, email = ? WHERE id = uuid_to_bin(?)";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(query)) {
+            statement.setString(1, user.getName());
+            statement.setString(2, user.getEmail());
+            statement.setString(3, id);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("User not found.");
+            }
+
+            user.setId(UUID.fromString(id));
+            return user.toString();
+        }
+    }
+
     public Map<String, String> parseQuery(URI uri) throws UnsupportedEncodingException {
         // reference: https://stackoverflow.com/a/13592567
         String query = uri.getQuery();
@@ -157,6 +170,21 @@ public class UserHandler implements HttpHandler {
         }
 
         return parseUrlEncoded(query);
+    }
+
+    public Map<String, String> parseUrlEncodedBody(InputStream is) throws IOException {
+        StringBuilder buf;
+        try (InputStreamReader isr = new InputStreamReader(is, "utf-8")) {
+            try (BufferedReader br = new BufferedReader(isr)) {
+                int b;
+                buf = new StringBuilder(512);
+                while ((b = br.read()) != -1) {
+                    buf.append((char) b);
+                }
+            }
+        }
+
+        return parseUrlEncoded(buf.toString());
     }
 
     public Map<String, String> parseUrlEncoded(String encodedUrl) throws UnsupportedEncodingException {
