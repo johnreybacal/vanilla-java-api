@@ -40,7 +40,6 @@ public class RouteResolver implements HttpHandler {
         try (exchange) {
             for (Route route : this.routes) {
                 if (RouteHelper.isRouteMatch(route, exchange.getRequestMethod(), exchange.getRequestURI().getPath())) {
-                    System.out.println("MATCH");
                     Request request = new Request(exchange);
                     Response response = new Response(exchange);
                     RouteHelper.setRequestParameters(request, route.getParameters());

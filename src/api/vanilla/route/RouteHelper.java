@@ -32,15 +32,12 @@ public class RouteHelper {
     }
 
     public static boolean isRouteMatch(Route route, String method, String url) {
-        System.out.println(route.getMethod() + " " + method);
         if (!route.getMethod().equals(method)) {
             return false;
         }
 
         List<String> target = getSegments(route.getUrl());
         List<String> current = getSegments(url);
-        System.out.println(target);
-        System.out.println(current);
 
         if (target.size() != current.size()) {
             return false;
@@ -48,14 +45,10 @@ public class RouteHelper {
 
         Set<Integer> keys = route.getParameters().keySet();
 
-        System.out.println(keys);
         for (int key : keys) {
             target.remove(key);
             current.remove(key);
         }
-
-        System.out.println(target);
-        System.out.println(current);
 
         return String.join("", target)
                 .equals(String.join("", current));
