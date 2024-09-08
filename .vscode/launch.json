@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Dev App",
+            "request": "launch",
+            "mainClass": "api.dev.main.App",
+            "projectName": "vanilla-java-api_4e43b82d",
+            "env": {
+                "DB_URL": "jdbc:mysql://localhost:3306/shop_feed_user",
+                "DB_USER": "root",
+                "DB_PASS": "root",
+            }
+        }
+    ]
+}
