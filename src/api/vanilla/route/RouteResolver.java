@@ -58,7 +58,10 @@ public class RouteResolver implements HttpHandler {
                     Response response = new Response(exchange);
                     RouteHelper.setRequestParameters(request, route.getParameters());
 
-                    route.getCallback().resolve(request, response);
+                    RequestResolver[] callbacks = route.getCallback();
+                    for (int i = 0; i < callbacks.length; i++) {
+                        callbacks[i].resolve(request, response);
+                    }
 
                     return;
                 }

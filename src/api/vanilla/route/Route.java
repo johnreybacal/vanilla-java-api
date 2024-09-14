@@ -11,12 +11,11 @@ public class Route {
     private final String url;
     private final Method method;
     private final Map<Integer, String> parameters;
-    private final RequestResolver callback;
+    private final RequestResolver[] callback;
 
     public Route(String url,
             Method method,
-            RequestResolver callback
-    ) {
+            RequestResolver... callback) {
         this.url = url;
         this.method = method;
         this.parameters = new HashMap<>();
@@ -26,8 +25,7 @@ public class Route {
     public Route(String url,
             Method method,
             Map<Integer, String> parameters,
-            RequestResolver callback
-    ) {
+            RequestResolver... callback) {
         this.url = url;
         this.method = method;
         this.parameters = parameters;
@@ -46,7 +44,7 @@ public class Route {
         return parameters;
     }
 
-    public RequestResolver getCallback() {
+    public RequestResolver[] getCallback() {
         return callback;
     }
 

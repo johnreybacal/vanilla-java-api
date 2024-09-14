@@ -17,7 +17,7 @@ public class Router {
         routes = new ArrayList<>();
     }
 
-    public void on(Method method, String url, RequestResolver callback) {
+    public void on(Method method, String url, RequestResolver... callback) {
         url = this.url + url;
 
         List<String> urlSegments = RouteHelper.getSegments(url);
@@ -27,7 +27,7 @@ public class Router {
         this.routes.add(route);
     }
 
-    public void on(Method method, RequestResolver callback) {
+    public void on(Method method, RequestResolver... callback) {
         Route route = new Route(url, method, callback);
         this.routes.add(route);
     }

@@ -25,9 +25,6 @@ public class Response {
     }
 
     public void send(int statusCode, Object data) throws IOException {
-        System.out.println(exchange.getRequestMethod() + " "
-                + exchange.getRequestURI().getPath() + " "
-                + statusCode);
         String response = data.toString();
 
         exchange.sendResponseHeaders(statusCode, response.length());
@@ -41,5 +38,9 @@ public class Response {
         contentType.add("application/json");
         exchange.getResponseHeaders().put("Content-Type", contentType);
         this.send(statusCode, data);
+    }
+
+    public HttpExchange getExchange() {
+        return this.exchange;
     }
 }
